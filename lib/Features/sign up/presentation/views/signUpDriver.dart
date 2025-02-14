@@ -170,7 +170,6 @@ class _SignupdriverState extends State<Signupdriver> {
                 const SizedBox(height: 10),
 
                 // Terms Checkbox
-                // Terms Checkbox
                 Row(
                   children: [
                     Checkbox(

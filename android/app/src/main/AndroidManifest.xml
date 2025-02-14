@@ -4,6 +4,7 @@
         android:label="wasalny"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        
          <meta-data android:name="com.google.android.geo.API_KEY"
                android:value="AIzaSyA2krlhMupMlhllOHR03Nl8eCOW_2uAHKY"/>
         <activity
@@ -43,6 +44,8 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+
         </intent>
     </queries>
+
 </manifest>

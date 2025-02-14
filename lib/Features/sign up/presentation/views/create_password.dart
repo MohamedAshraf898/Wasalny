@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:wasalny/Features/sign%20up/presentation/views/profile_screen.dart';
 import 'package:wasalny/constant.dart';
 
 class CreatePasswordPage extends StatefulWidget {
@@ -142,7 +143,15 @@ class _CreatePasswordPageState extends State<CreatePasswordPage> {
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const ProfileScreen()),
+                      );
+                    }
+                  },
                   child: Text(
                     "تسجيل",
                     style: GoogleFonts.cairo(color: Colors.white, fontSize: 16),

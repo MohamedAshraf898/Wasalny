@@ -11,9 +11,25 @@ class SignupUser extends StatefulWidget {
 
 class _SignupUserState extends State<SignupUser> {
   final _formKey = GlobalKey<FormState>();
+
   String countryCode = "+20";
   String countryFlag = "🇪🇬"; // Default flag (Egypt)
   bool termsAccepted = false;
+
+  // Controllers for input fields
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +56,7 @@ class _SignupUserState extends State<SignupUser> {
                     "سجّل باستخدام بريدك الإلكتروني أو رقم تليفونك",
                     style: GoogleFonts.cairo(
                       fontSize: 18,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -49,13 +65,27 @@ class _SignupUserState extends State<SignupUser> {
 
                 // First Name
                 TextFormField(
+                  controller: _firstNameController,
                   decoration: _inputDecoration("الاسم الأول"),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return "الاسم الأول مطلوب";
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 10),
 
                 // Last Name
                 TextFormField(
+                  controller: _lastNameController,
                   decoration: _inputDecoration("الاسم الأخير"),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return "الاسم الأخير مطلوب";
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 10),
 
@@ -64,9 +94,19 @@ class _SignupUserState extends State<SignupUser> {
                   children: [
                     Expanded(
                       child: TextFormField(
+                        controller: _phoneController,
                         keyboardType: TextInputType.phone,
                         textAlign: TextAlign.right,
                         decoration: _inputDecoration("رقم هاتفك المحمول"),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return "رقم الهاتف مطلوب";
+                          } else if (!RegExp(r'^[0-9]{10,15}$')
+                              .hasMatch(value)) {
+                            return "الرجاء إدخال رقم هاتف صحيح";
+                          }
+                          return null;
+                        },
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -78,8 +118,7 @@ class _SignupUserState extends State<SignupUser> {
                           onSelect: (Country country) {
                             setState(() {
                               countryCode = "+${country.phoneCode}";
-                              countryFlag =
-                                  country.flagEmoji; // Get the country flag
+                              countryFlag = country.flagEmoji;
                             });
                           },
                         );
@@ -88,14 +127,14 @@ class _SignupUserState extends State<SignupUser> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 12),
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
+                          border: Border.all(
+                              color: const Color.fromARGB(255, 124, 124, 124)),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
                           children: [
                             Text(countryFlag,
-                                style: const TextStyle(
-                                    fontSize: 20)), // Display flag
+                                style: const TextStyle(fontSize: 20)),
                             const SizedBox(width: 5),
                             Text(countryCode,
                                 style: const TextStyle(fontSize: 16)),
@@ -110,8 +149,18 @@ class _SignupUserState extends State<SignupUser> {
 
                 // Email
                 TextFormField(
+                  controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
                   decoration: _inputDecoration("البريد الإلكتروني"),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return "البريد الإلكتروني مطلوب";
+                    } else if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                        .hasMatch(value)) {
+                      return "الرجاء إدخال بريد إلكتروني صحيح";
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 10),
 
@@ -150,10 +199,24 @@ class _SignupUserState extends State<SignupUser> {
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => Otp()),
-                      );
+                      if (_formKey.currentState!.validate()) {
+                        if (!termsAccepted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                "يجب الموافقة على الشروط قبل المتابعة",
+                                textAlign: TextAlign.center,
+                              ),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                          return;
+                        }
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const Otp()),
+                        );
+                      }
                     },
                     child: Text(
                       "إنشاء حساب",
@@ -202,9 +265,7 @@ class _SignupUserState extends State<SignupUser> {
                               fontSize: 14, color: kPrimaryColor),
                         ),
                       ),
-                      const SizedBox(
-                        width: 5,
-                      ),
+                      const SizedBox(width: 5),
                       Text(
                         "لديك حساب بالفعل؟",
                         style: GoogleFonts.cairo(
@@ -221,14 +282,6 @@ class _SignupUserState extends State<SignupUser> {
     );
   }
 
-  InputDecoration _inputDecoration(String label) {
-    return InputDecoration(
-      labelText: label,
-      labelStyle: GoogleFonts.cairo(fontSize: 14),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-    );
-  }
-
   Widget _socialLoginButton(String text, String asset) {
     return SizedBox(
       width: double.infinity,
@@ -239,12 +292,23 @@ class _SignupUserState extends State<SignupUser> {
           ),
           padding: const EdgeInsets.symmetric(vertical: 12),
         ),
-        icon: Image.asset(asset,
-            width: 24, height: 24), // Add social icons in assets folder
+        icon: Image.asset(asset, width: 24, height: 24),
         label: Text(text,
             style: GoogleFonts.cairo(fontSize: 14, color: Colors.black)),
         onPressed: () {},
       ),
     );
   }
+}
+
+InputDecoration _inputDecoration(String label) {
+  return InputDecoration(
+    labelText: label,
+    labelStyle: GoogleFonts.cairo(fontSize: 14),
+    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+    focusedBorder: OutlineInputBorder(
+      borderSide: const BorderSide(color: kPrimaryColor, width: 2),
+      borderRadius: BorderRadius.circular(8),
+    ),
+  );
 }
